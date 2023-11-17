@@ -3,10 +3,12 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+
 class PublishedManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset()\
-                      .filter(status=Post.Status.PUBLISHED)
+        return super().get_queryset().filter(status=Post.Status.PUBLISHED)
+
+
 class Post(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'DF', 'Draft'
@@ -27,6 +29,7 @@ class Post(models.Model):
 
     objects = models.Manager()  # менеджер, применяемый по умолчанию
     published = PublishedManager()
+
     class Meta:
         ordering = ['-publish']
         indexes = [
@@ -39,7 +42,33 @@ class Post(models.Model):
                              self.publish.month,
                              self.publish.day,
                              self.slug])
+
     def __str__(self):
         return self.title
 
-# не забудь про миграции
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             related_name='comments')  # Пост объекта комментариев можно извлекать посредством comment.
+    # post и все комментарии, ассоциированные с объектом-постом, – посредством post.comments.all()
+    name = models.CharField(max_length=80)
+    email = models.EmailField()
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['created']
+        indexes = [
+            models.Index(fields=['created']),
+        ]
+    # В Meta-класс модели был добавлен атрибут ordering = ['created'], чтобы по умолчанию сортировать комментарии в
+    # хронологическом порядке и индексировать поля created в возрастающем порядке.
+
+    def __str__(self):
+        return f'Comment by {self.name} on {self.post}'
+
+# python3 manage.py makemigrations blog
+# python3 manage.py migrate
