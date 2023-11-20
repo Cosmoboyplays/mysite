@@ -70,5 +70,12 @@ class Comment(models.Model):
     def __str__(self):
         return f'Comment by {self.name} on {self.post}'
 
+# 1) Можно еще добавить в класс Meta verbose_name = 'комментарий' и verbose_name_plural = 'Комментарии' ,
+# то же сделать и с моделью Post
+#
+# 2) В settings.py LANGUAGE_CODE = 'ru-RU'
+#
+# 3) В apps.py у класса BlogConfig установить verbose_name = 'Блог'
+
 # python3 manage.py makemigrations blog
 # python3 manage.py migrate
