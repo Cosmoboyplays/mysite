@@ -1,14 +1,23 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from taggit.models import Tag
+from django.db.models import Count
+from django.core.mail import send_mail
 
 from .forms import EmailPostForm, CommentForm
 from .models import Post
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-def post_list(request):
-    postlist = Post.published.all()
-    paginator = Paginator(postlist, 3)
+def post_list(request, tag_slug=None):
+    post_list = Post.published.all()
+
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        post_list = post_list.filter(tags__in=[tag])
+
+    paginator = Paginator(post_list, 3)
     page_number = request.GET.get('page', 1)
     try:
         posts = paginator.page(page_number)
@@ -23,23 +32,35 @@ def post_list(request):
 
     return render(request,
                   'blog/post/list.html',
-                  {'posts': posts})
+                  {'posts': posts,
+                   'tag': tag})
 
 
 def post_detail(request, year, month, day, post):
     post = get_object_or_404(Post,
-                             status=Post.Status.PUBLISHED, # мы указываем, что мы хотим получить объекты  Post ,
+                             status=Post.Status.PUBLISHED,  # мы указываем, что мы хотим получить объекты  Post ,
                              # у которых значение поля  status  равно  PUBLISHED
                              slug=post,
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
+    # Список активных комментариев к этому посту
+    comments = post.comments.filter(active=True)
+    # Форма для комментирования пользователями
+    form = CommentForm()
+    # Список схожих постов
+    post_tags_ids = post.tags.values_list('id', flat=True)  # список идентификаторов тегов текущего поста
+    similar_posts = Post.published.filter(tags__in=post_tags_ids).exclude(id=post.id)  # все опубликованные посты,
+    # у которых есть теги, содержащиеся в списке  post_tags_ids , за исключением текущего поста
+    similar_posts = similar_posts.annotate(same_tags=Count('tags')) \
+                        .order_by('-same_tags', '-publish')[:4]
+
     return render(request,
                   'blog/post/detail.html',
-                  {'post': post})
-
-
-from django.core.mail import send_mail
+                  {'post': post,
+                   "comments": comments,
+                   'form': form,
+                   'similar_posts': similar_posts})
 
 
 def post_share(request, post_id):
@@ -67,8 +88,9 @@ def post_share(request, post_id):
     else:
         form = EmailPostForm()
     return render(request, 'blog/post/share.html', {'post': post,
-                                                                         'form': form,
-                                                                         'sent': sent})
+                                                    'form': form,
+                                                    'sent': sent})
+
 
 @require_POST
 def post_comment(request, post_id):

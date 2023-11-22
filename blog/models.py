@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
+from taggit.managers import TaggableManager
 
 
 class PublishedManager(models.Manager):
@@ -29,6 +30,7 @@ class Post(models.Model):
 
     objects = models.Manager()  # менеджер, применяемый по умолчанию
     published = PublishedManager()
+    tags = TaggableManager()
 
     class Meta:
         ordering = ['-publish']
@@ -64,11 +66,25 @@ class Comment(models.Model):
         indexes = [
             models.Index(fields=['created']),
         ]
-    # В Meta-класс модели был добавлен атрибут ordering = ['created'], чтобы по умолчанию сортировать комментарии в
-    # хронологическом порядке и индексировать поля created в возрастающем порядке.
 
     def __str__(self):
         return f'Comment by {self.name} on {self.post}'
+
+    # python manage.py shell
+    # Выполните следующий ниже исходный код, чтобы получить один из постов (пост с ID = 1):
+    #
+    # from blog.models import Post
+    # post = Post.objects.get(id=1)
+    # Затем добавьте в него несколько тегов и извлеките его теги, чтобы проверить успешность их добавления:
+    #
+    # post.tags.add('music', 'jazz', 'django')
+    #
+    # post.tags.all()
+    # <QuerySet [<Tag: jazz>, <Tag: music>, <Tag: django>]>
+    # Наконец, удалите тег и еще раз проверьте список тегов:
+    #
+    # post.tags.remove('django')
+    # post.tags.all()
 
 # 1) Можно еще добавить в класс Meta verbose_name = 'комментарий' и verbose_name_plural = 'Комментарии' ,
 # то же сделать и с моделью Post
@@ -79,3 +95,4 @@ class Comment(models.Model):
 
 # python3 manage.py makemigrations blog
 # python3 manage.py migrate
+
