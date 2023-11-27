@@ -27,4 +27,11 @@
         {{ post.body|markdown|truncatewords_html:30 }}
     {% endfor %}
     {% include "pagination.html" with page=posts %}
+
+
+    Результат ppp:
+    {% for post in ppp %}
+        <p>{{ post.title }}: {{ post.body }}
+        </p>
+    {% endfor %}
 {% endblock %}
