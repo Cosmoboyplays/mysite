@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'django-insecure-ql!&(z^gy)skx3798!(yea528cos#f+2)3fj_!01valb0z5=7*
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 SITE_ID = 1
@@ -43,8 +41,26 @@ INSTALLED_APPS = [
     'django.contrib.sites',  # python manage.py migrate
     'django.contrib.sitemaps',
     'django.contrib.postgres',
-    'accounts.apps.AccountsConfig'
+    'accounts.apps.AccountsConfig',
+    'social_django',  # python manage.py makemigrations    #  python manage.py migrate
+    'django_summernote',
+    'django_bootstrap5',
+    'rest_framework',
+    'blog_api_v1.apps.BlogApiConfig',
+    'django_filters',
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',  # new
+    'PAGE_SIZE': 3,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.BasicAuthentication', # new
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,13 +85,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -88,7 +105,6 @@ DATABASES = {
         'PASSWORD': '12345678',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -108,7 +124,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -120,7 +135,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -131,7 +145,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # Конфигурация сервера электронной почты
@@ -141,7 +154,31 @@ EMAIL_HOST_PASSWORD = 'eqza zdfi vgnb hyyc'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-
 LOGIN_REDIRECT_URL = "/"
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+
+
+# social auth configs for github
+SOCIAL_AUTH_GITHUB_KEY = '681877242bc947655d76'
+SOCIAL_AUTH_GITHUB_SECRET = '3ae924041fe03c5fcd9eb142e3544123d267c0cf'
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '866097267952-u6skvn64f997cv0ja54b2et3dsn6dbl1.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SUMMERNOTE_THEME = 'bs5'
+SUMMERNOTE_CONFIG = {
+    'summernote': {
+       'inheritPlaceholder': True
+    },
+}

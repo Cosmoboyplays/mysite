@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger
 from taggit.models import Tag
 from django.db.models import Count
 from django.core.mail import send_mail
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from django.core.paginator import Paginator
 
 from .forms import EmailPostForm, CommentForm, SearchForm
 from .models import Post
