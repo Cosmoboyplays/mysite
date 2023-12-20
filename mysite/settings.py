@@ -45,9 +45,12 @@ INSTALLED_APPS = [
     'social_django',  # python manage.py makemigrations    #  python manage.py migrate
     'django_summernote',
     'django_bootstrap5',
+    # API
     'rest_framework',
     'blog_api_v1.apps.BlogApiConfig',
     'django_filters',
+    'rest_framework.authtoken',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
@@ -60,6 +63,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
@@ -181,4 +185,12 @@ SUMMERNOTE_CONFIG = {
     'summernote': {
        'inheritPlaceholder': True
     },
+}
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Blog API Project",
+    "DESCRIPTION": "A sample blog to learn about DRF",
+    "VERSION": "1.0.0",
+    # OTHER SETTINGS
 }
